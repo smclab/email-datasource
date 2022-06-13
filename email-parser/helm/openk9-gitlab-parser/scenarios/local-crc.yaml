@@ -1,0 +1,5 @@
+# This scenario creates a single standalone WebParser
+# machine, with the most basic configuration and limited
+# resource to be fit in a local CodeReady Containers environment
+
+

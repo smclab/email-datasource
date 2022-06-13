@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: openk9
+  name: gitlab-parser
+  labels:
+    app: gitlab-parser
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: gitlab-parser
+
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: openk9
+  name: gitlab-parser-config
+  labels:
+    app: gitlab-parser
+data:
+  INGESTION_URL: 'http://openk9-ingestion:8080/v1/ingestion/'
+  DELETE_URL: 'http://openk9-index-writer:8080/v1/delete-data-documents'
+  
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: openk9
+  name: gitlab-parser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab-parser
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gitlab-parser
+    spec:
+      containers:
+        - name: gitlab-parser
+          image: registry.smc.it:49083/openk9/gitlab-parser:latest
+          ports:
+            - containerPort: 80
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: gitlab-parser-config
+      imagePullSecrets:
+        - name: registry.smc.it
