@@ -118,8 +118,7 @@ class AsyncEmailExtraction(threading.Thread):
                     }
                     
                     try:
-                        # self.post_message(ingestion_url, payload, 10)
-                        self.status_logger.info(payload)
+                        post_message(ingestion_url, payload, 10)
                         email_posted += 1
                     except requests.RequestException:
                         self.status_logger.error("Problems during extraction of email with id " + str(num))
