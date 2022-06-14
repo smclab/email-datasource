@@ -33,7 +33,7 @@ class ImapRequest(BaseModel):
     folder: str
 
 
-@app.post("/getEmail")
+@app.post("/execute")
 def get_data(request: ImapRequest):
 
     class AsyncTask(threading.Thread):
