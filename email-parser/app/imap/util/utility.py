@@ -41,6 +41,7 @@ def parse_email(fetched_msg):
             msg_subject = msg_subject.decode('utf-8')
         except UnicodeDecodeError:
             msg_subject = msg_subject.decode('latin1')
+
     msg_from = msg['From']
     msg_to = msg['To']
     msg_cc = msg['Cc']
@@ -53,7 +54,7 @@ def parse_email(fetched_msg):
     raw_body = ""
     try:
         if msg.is_multipart():
-            for part in msg.walk():
+            for j, part in enumerate(msg.walk()):
                 content_type = part.get_content_type()
                 if content_type == 'text/html':
                     charset = part.get_content_charset()
@@ -62,7 +63,13 @@ def parse_email(fetched_msg):
                     # if we've found the plain/text part, stop looping thru the parts
                 elif content_type in ["image/png", "image/jpg", "image/jpeg", "application/pdf", "application/msword"]:
                     data = get_as_base64(part.get_payload(decode=True))
-                    binaries.append(data)
+                    binary = {
+                        "id": str(msg_id) + "_" + str(j),
+                        "name": str(msg_id) + "_" + str(j),
+                        "contentType": content_type,
+                        "data": data
+                    }
+                    binaries.append(binary)
         else:
             # not multipart - i.e. plain text, no attachments
             charset = msg.get_content_charset()
