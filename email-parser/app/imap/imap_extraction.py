@@ -14,7 +14,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import json
 import threading
 import logging
 import requests
@@ -90,6 +90,7 @@ class AsyncEmailExtraction(threading.Thread):
             self.status_logger.info("There are " + str(email_count) + " new messages from " + start_date)
 
             for i, num in enumerate(msg_nums[0].split()):
+
                 self.status_logger.info("Extracting and parsing email " + str(i+1) + " of " + str(email_count)
                                         + " from " + str(self.username))
                 ret_val, fetched_msg = self.imap.get_message(num)
@@ -97,7 +98,7 @@ class AsyncEmailExtraction(threading.Thread):
                 if ret_val != 'OK':
                     self.status_logger.error('ERROR getting message', num)
                     continue
-                    
+
                 raw_msg, struct_msg, msg_id, binaries = parse_email(fetched_msg)
 
                 datasource_payload = {
@@ -113,10 +114,10 @@ class AsyncEmailExtraction(threading.Thread):
                         "rawContent": raw_msg,
                         "datasourcePayload": datasource_payload,
                         "resources": {
-                            "binaries": binaries
+                            "binaries": json.dumps(binaries)
                         }
                     }
-                    
+
                     try:
                         post_message(ingestion_url, payload, 10)
                         email_posted += 1
@@ -125,7 +126,7 @@ class AsyncEmailExtraction(threading.Thread):
                         self.status = "ERROR"
                         continue
                 else:
-                    self.status_logger.info("Discarded because time is before timestamp") 
+                    self.status_logger.info("Discarded because time is before timestamp")
                         
         else:
             self.status = "ERROR"
