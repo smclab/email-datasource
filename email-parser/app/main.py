@@ -44,7 +44,7 @@ def get_data(request: ImapRequest):
                                                               datasource_id_, folder_)
 
         def run(self):
-            self.email_extraction_task.start()
+            self.email_extraction_task.extract()
 
     request = request.dict()
 
