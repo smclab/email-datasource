@@ -82,7 +82,7 @@ def parse_email(fetched_msg):
     body = BeautifulSoup(raw_body, features="html.parser").get_text()
     body = body.replace('\n', ' ').replace('\r', '').replace('\t', '').strip()
 
-    struct_msg = {'date': (local_date * 1000), 'from': msg_from, 'subject': msg_subject, 'to': msg_to, 'cc': msg_cc,
+    struct_msg = {'date': str((local_date * 1000)), 'from': msg_from, 'subject': msg_subject, 'to': msg_to, 'cc': msg_cc,
                   'body': body, "htmlBody": raw_body}
 
     msg_date = datetime.fromtimestamp(local_date).strftime("%a, %d %b %Y %H:%M:%S")
