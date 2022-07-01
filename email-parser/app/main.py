@@ -30,21 +30,12 @@ class ImapRequest(BaseModel):
     password: str
     timestamp: int
     datasourceId: int
+    scheduleId: str
     folder: str
 
 
 @app.post("/execute")
 def get_data(request: ImapRequest):
-
-    class AsyncTask(threading.Thread):
-
-        def __init__(self, mail_server_, port_, username_, password_, timestamp_, datasource_id_, folder_):
-            super(AsyncTask, self).__init__()
-            self.email_extraction_task = AsyncEmailExtraction(mail_server_, port_, username_, password_, timestamp_,
-                                                              datasource_id_, folder_)
-
-        def run(self):
-            self.email_extraction_task.extract()
 
     request = request.dict()
 
@@ -55,8 +46,12 @@ def get_data(request: ImapRequest):
     datasource_id = request["datasourceId"]
     timestamp = request["timestamp"]
     folder = request["folder"]
+    schedule_id = request["scheduleId"]
 
-    async_task = AsyncTask(mail_server, port, username, password, timestamp, datasource_id, folder)
-    async_task.start()
+    email_extraction_task = AsyncEmailExtraction(mail_server, port, username, password, timestamp, datasource_id,
+                                                 folder, schedule_id)
+
+    thread = threading.Thread(target=email_extraction_task.extract())
+    thread.start()
 
     return "extraction started"

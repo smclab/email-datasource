@@ -12,7 +12,7 @@ from ..util.log_config import LogConfig
 
 dictConfig(LogConfig().dict())
 
-logger = logging.getLogger("mycoolapp")
+logger = logging.getLogger("email-logger")
 
 
 def post_message(url, payload, timeout=20):

@@ -37,7 +37,7 @@ if ingestion_url is None:
 
 class AsyncEmailExtraction(threading.Thread):
 
-    def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder):
+    def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder, schedule_id):
         super(AsyncEmailExtraction, self).__init__()
 
         self.mail_server = mail_server
@@ -47,6 +47,7 @@ class AsyncEmailExtraction(threading.Thread):
         self.timestamp = timestamp
         self.datasource_id = datasource_id
         self.folder = folder
+        self.schedule_id = schedule_id
 
         self.status_logger = logging.getLogger('email-logger')
 
@@ -115,7 +116,8 @@ class AsyncEmailExtraction(threading.Thread):
                         "datasourcePayload": datasource_payload,
                         "resources": {
                             "binaries": binaries
-                        }
+                        },
+                        "scheduleId": self.schedule_id
                     }
 
                     try:
