@@ -61,7 +61,8 @@ def parse_email(fetched_msg):
                     # decode the base64 unicode bytestring into plain text
                     raw_body = part.get_payload(decode=True).decode(encoding=charset, errors="ignore")
                     # if we've found the plain/text part, stop looping thru the parts
-                elif content_type in ["image/png", "image/jpg", "image/jpeg", "application/pdf", "application/msword"]:
+                elif content_type in ["image/png", "image/jpg", "image/jpeg", "application/pdf", "application/msword",
+                                      "text/plain"]:
                     data = get_as_base64(part.get_payload(decode=True))
                     binary = {
                         "id": str(msg_id) + "_" + str(j),
