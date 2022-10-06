@@ -115,7 +115,8 @@ class AsyncEmailExtraction(threading.Thread):
                         "rawContent": raw_msg,
                         "datasourcePayload": datasource_payload,
                         "resources": {
-                            "binaries": binaries
+                            "binaries": binaries,
+                            "splitBinaries": True
                         },
                         "scheduleId": self.schedule_id
                     }
