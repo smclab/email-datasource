@@ -82,10 +82,9 @@ def parse_email(fetched_msg):
     body = BeautifulSoup(raw_body, features="html.parser").get_text()
     body = body.replace('\n', ' ').replace('\r', '').replace('\t', '').strip()
 
-    struct_msg = {'date': (local_date * 1000), 'from': msg_from, 'subject': msg_subject, 'to': msg_to, 'cc': msg_cc,
-                  'body': body, "htmlBody": raw_body}
-
     msg_date = datetime.fromtimestamp(local_date).strftime("%a, %d %b %Y %H:%M:%S")
+
+    acl_list = [email.utils.parseaddr(msg_from)[1]]
 
     raw_msg = ""
     if msg_subject is not None:
@@ -93,8 +92,12 @@ def parse_email(fetched_msg):
     raw_msg = raw_msg + " Date: " + msg_date + " From: " + msg_from
     if msg_to is not None:
         raw_msg = raw_msg + " To: " + msg_to
+        acl_list.append(msg_to)
     if msg_cc is not None:
         raw_msg = raw_msg + " CC: " + msg_cc
     raw_msg = raw_msg + " " + body
 
-    return raw_msg, struct_msg, msg_id, binaries
+    struct_msg = {'date': (local_date * 1000), 'from': msg_from, 'subject': msg_subject, 'to': msg_to, 'cc': msg_cc,
+                  'body': body, "htmlBody": raw_body}
+
+    return raw_msg, struct_msg, msg_id, binaries, acl_list

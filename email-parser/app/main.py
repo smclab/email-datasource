@@ -32,6 +32,7 @@ class ImapRequest(BaseModel):
     datasourceId: int
     scheduleId: str
     folder: str
+    tenantId: str
 
 
 @app.post("/execute")
@@ -47,9 +48,10 @@ def get_data(request: ImapRequest):
     timestamp = request["timestamp"]
     folder = request["folder"]
     schedule_id = request["scheduleId"]
+    tenant_id = request["tenantId"]
 
     email_extraction_task = AsyncEmailExtraction(mail_server, port, username, password, timestamp, datasource_id,
-                                                 folder, schedule_id)
+                                                 folder, schedule_id, tenant_id)
 
     thread = threading.Thread(target=email_extraction_task.extract())
     thread.start()

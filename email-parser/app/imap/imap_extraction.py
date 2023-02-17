@@ -37,7 +37,7 @@ if ingestion_url is None:
 
 class AsyncEmailExtraction(threading.Thread):
 
-    def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder, schedule_id):
+    def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder, schedule_id, tenant_id):
         super(AsyncEmailExtraction, self).__init__()
 
         self.mail_server = mail_server
@@ -48,6 +48,7 @@ class AsyncEmailExtraction(threading.Thread):
         self.datasource_id = datasource_id
         self.folder = folder
         self.schedule_id = schedule_id
+        self.tenant_id = tenant_id
 
         self.status_logger = logging.getLogger('email-logger')
 
@@ -100,7 +101,7 @@ class AsyncEmailExtraction(threading.Thread):
                     self.status_logger.error('ERROR getting message', num)
                     continue
 
-                raw_msg, struct_msg, msg_id, binaries = parse_email(fetched_msg)
+                raw_msg, struct_msg, msg_id, binaries, acl_list = parse_email(fetched_msg)
 
                 datasource_payload = {
                     "email": struct_msg
@@ -118,21 +119,24 @@ class AsyncEmailExtraction(threading.Thread):
                             "binaries": binaries,
                             "splitBinaries": True
                         },
-                        "scheduleId": self.schedule_id
+                        "scheduleId": self.schedule_id,
+                        "tenantId": self.tenant_id,
+                        "acl": {
+                            "email": acl_list
+                        }
                     }
 
                     try:
-                        post_message(ingestion_url, payload, 10)
+                        # post_message(ingestion_url, payload, 10)
+                        self.status_logger.info(payload)
                         email_posted += 1
                     except requests.RequestException:
                         self.status_logger.error("Problems during extraction of email with id " + str(num))
-                        self.status = "ERROR"
                         continue
                 else:
                     self.status_logger.info("Discarded because time is before timestamp")
                         
         else:
-            self.status = "ERROR"
             self.status_logger.error(f"ERROR: Unable to search email in folder: check if query is well done")
         
         # when done, you should log out
