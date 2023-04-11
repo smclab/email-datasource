@@ -126,9 +126,11 @@ class AsyncEmailExtraction(threading.Thread):
                     }
 
                     if self.index_acl:
-                        payload["acl"] = acl_list
+                        payload["acl"] = {
+                            "email": acl_list
+                        }
                     else:
-                        payload["acl"] = []
+                        payload["acl"] = {}
 
                     try:
                         post_message(ingestion_url, payload, 10)
