@@ -37,7 +37,8 @@ if ingestion_url is None:
 
 class AsyncEmailExtraction(threading.Thread):
 
-    def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder, schedule_id, tenant_id):
+    def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder, schedule_id, tenant_id,
+                 index_acl):
         super(AsyncEmailExtraction, self).__init__()
 
         self.mail_server = mail_server
@@ -49,6 +50,7 @@ class AsyncEmailExtraction(threading.Thread):
         self.folder = folder
         self.schedule_id = schedule_id
         self.tenant_id = tenant_id
+        self.index_acl = index_acl
 
         self.status_logger = logging.getLogger('email-logger')
 
@@ -111,20 +113,22 @@ class AsyncEmailExtraction(threading.Thread):
 
                     payload = {
                         "datasourceId": self.datasource_id,
-                        "contentId": msg_id,
+                        "contentId": str(msg_id).replace("<", "").replace(">", ""),
                         "parsingDate": int(end_timestamp),
-                        "rawContent": raw_msg,
+                        "rawContent": "",
                         "datasourcePayload": datasource_payload,
                         "resources": {
-                            "binaries": binaries,
+                            "binaries": [],
                             "splitBinaries": True
                         },
                         "scheduleId": self.schedule_id,
                         "tenantId": self.tenant_id,
-                        "acl": {
-                            "email": acl_list
-                        }
                     }
+
+                    if self.index_acl:
+                        payload["acl"] = acl_list
+                    else:
+                        payload["acl"] = []
 
                     try:
                         post_message(ingestion_url, payload, 10)

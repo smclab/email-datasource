@@ -84,20 +84,47 @@ def parse_email(fetched_msg):
 
     msg_date = datetime.fromtimestamp(local_date).strftime("%a, %d %b %Y %H:%M:%S")
 
-    acl_list = [email.utils.parseaddr(msg_from)[1]]
-
     raw_msg = ""
     if msg_subject is not None:
         raw_msg = raw_msg + "Subject: " + msg_subject
+
+    msg_from_email = email.utils.parseaddr(msg_from)[1]
+    msg_from_user = email.utils.parseaddr(msg_from)[0]
+    if len(msg_from_user) == 0:
+        msg_from_user = None
+
+    acl_list = [msg_from_email]
+
     raw_msg = raw_msg + " Date: " + msg_date + " From: " + msg_from
+
+    msg_to_email = msg_to_user = msg_cc_email = msg_cc_user = None
+
     if msg_to is not None:
+
+        msg_to_email = [email.utils.parseaddr(to)[1] for to in str(msg_to).split(",")]
+        msg_to_user = [email.utils.parseaddr(to)[0] if len(to) > 0 else None for to in str(msg_to).split(",")]
+
         raw_msg = raw_msg + " To: " + msg_to
-        acl_list.append(msg_to)
+
+        acl_list = acl_list + msg_to_email
+
     if msg_cc is not None:
+
+        msg_cc_email = [email.utils.parseaddr(cc)[1] for cc in str(msg_cc).split(",")]
+        msg_cc_user = [email.utils.parseaddr(cc)[0] if len(cc) > 0 else None for cc in str(msg_cc).split(",")]
+
         raw_msg = raw_msg + " CC: " + msg_cc
+
+        acl_list = acl_list + msg_cc_email
+
     raw_msg = raw_msg + " " + body
 
-    struct_msg = {'date': (local_date * 1000), 'from': msg_from, 'subject': msg_subject, 'to': msg_to, 'cc': msg_cc,
+    struct_msg = {'date': (local_date * 1000),
+                  'from_user': msg_from_user, 'from_email': msg_from_email,
+                  'to_user': msg_to_user, 'to_email': msg_to_email,
+                  'cc_user': msg_cc_user, 'cc_email': msg_cc_email,
+                  'subject': msg_subject,
+                  'to': msg_to, 'cc': msg_cc,
                   'body': body, "htmlBody": raw_body}
 
     return raw_msg, struct_msg, msg_id, binaries, acl_list
