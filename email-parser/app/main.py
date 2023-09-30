@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import threading
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Optional
 from imap.imap_extraction import AsyncEmailExtraction
 
 app = FastAPI()
@@ -33,7 +34,8 @@ class ImapRequest(BaseModel):
     scheduleId: str
     folder: str
     tenantId: str
-    indexAcl: bool
+    indexAcl: Optional[bool] = False
+    getAttachments: Optional[bool] = False
 
 
 @app.post("/execute")
@@ -51,9 +53,10 @@ def get_data(request: ImapRequest):
     schedule_id = request["scheduleId"]
     tenant_id = request["tenantId"]
     index_acl = request["indexAcl"]
+    get_attachments = request["getAttachments"]
 
     email_extraction_task = AsyncEmailExtraction(mail_server, port, username, password, timestamp, datasource_id,
-                                                 folder, schedule_id, tenant_id, index_acl)
+                                                 folder, schedule_id, tenant_id, index_acl, get_attachments)
 
     thread = threading.Thread(target=email_extraction_task.extract())
     thread.start()

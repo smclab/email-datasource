@@ -56,10 +56,12 @@ def parse_email(fetched_msg):
         if msg.is_multipart():
             for j, part in enumerate(msg.walk()):
                 content_type = part.get_content_type()
-                if content_type == 'text/html':
+                logger.info(content_type)
+                if content_type == 'text/html' or content_type == "text/plain":
                     charset = part.get_content_charset()
                     # decode the base64 unicode bytestring into plain text
                     raw_body = part.get_payload(decode=True).decode(encoding=charset, errors="ignore")
+                    logger.info('ok')
                     # if we've found the plain/text part, stop looping thru the parts
                 elif content_type in ["image/png", "image/jpg", "image/jpeg", "application/pdf", "application/msword"]:
                     data = get_as_base64(part.get_payload(decode=True))
@@ -70,6 +72,7 @@ def parse_email(fetched_msg):
                         "data": data
                     }
                     binaries.append(binary)
+
         else:
             # not multipart - i.e. plain text, no attachments
             charset = msg.get_content_charset()

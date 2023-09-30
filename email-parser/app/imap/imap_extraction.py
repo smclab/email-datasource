@@ -38,7 +38,7 @@ if ingestion_url is None:
 class AsyncEmailExtraction(threading.Thread):
 
     def __init__(self, mail_server, port, username, password, timestamp, datasource_id, folder, schedule_id, tenant_id,
-                 index_acl):
+                 index_acl, get_attachments):
         super(AsyncEmailExtraction, self).__init__()
 
         self.mail_server = mail_server
@@ -51,6 +51,7 @@ class AsyncEmailExtraction(threading.Thread):
         self.schedule_id = schedule_id
         self.tenant_id = tenant_id
         self.index_acl = index_acl
+        self.get_attachments = get_attachments
 
         self.status_logger = logging.getLogger('email-logger')
 
@@ -109,28 +110,37 @@ class AsyncEmailExtraction(threading.Thread):
                     "email": struct_msg
                 }
 
+                body = struct_msg['body']
+
                 if struct_msg['date'] > self.timestamp:
 
                     payload = {
                         "datasourceId": self.datasource_id,
                         "contentId": str(msg_id).replace("<", "").replace(">", ""),
                         "parsingDate": int(end_timestamp),
-                        "rawContent": "",
+                        "rawContent": body,
                         "datasourcePayload": datasource_payload,
-                        "resources": {
-                            "binaries": [],
-                            "splitBinaries": True
-                        },
                         "scheduleId": self.schedule_id,
                         "tenantId": self.tenant_id,
                     }
 
                     if self.index_acl:
                         payload["acl"] = {
-                            "email": acl_list
+                                "email": acl_list
                         }
                     else:
                         payload["acl"] = {}
+
+                    if self.get_attachments:
+                        payload["resource"] = {
+                            "binaries": binaries,
+                            "splitBinaries": True
+                        }
+                    else:
+                        payload["resource"] = {
+                            "binaries": [],
+                            "splitBinaries": True
+                        }
 
                     try:
                         post_message(ingestion_url, payload, 10)
