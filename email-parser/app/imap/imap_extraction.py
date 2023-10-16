@@ -132,12 +132,12 @@ class AsyncEmailExtraction(threading.Thread):
                         payload["acl"] = {}
 
                     if self.get_attachments:
-                        payload["resource"] = {
+                        payload["resources"] = {
                             "binaries": binaries,
                             "splitBinaries": True
                         }
                     else:
-                        payload["resource"] = {
+                        payload["resources"] = {
                             "binaries": [],
                             "splitBinaries": True
                         }
