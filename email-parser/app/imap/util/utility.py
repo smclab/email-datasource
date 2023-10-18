@@ -51,6 +51,7 @@ def parse_email(fetched_msg):
     local_date = email.utils.mktime_tz(msg_date)
 
     binaries = []
+    attachments = []
     raw_body = ""
     try:
         if msg.is_multipart():
@@ -61,7 +62,6 @@ def parse_email(fetched_msg):
                     charset = part.get_content_charset()
                     # decode the base64 unicode bytestring into plain text
                     raw_body = part.get_payload(decode=True).decode(encoding=charset, errors="ignore")
-                    logger.info('ok')
                     # if we've found the plain/text part, stop looping thru the parts
                 elif content_type in ["image/png", "image/jpg", "image/jpeg", "application/pdf", "application/msword"]:
                     data = get_as_base64(part.get_payload(decode=True))

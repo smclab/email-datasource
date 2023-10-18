@@ -61,6 +61,27 @@ class AsyncEmailExtraction(threading.Thread):
             self.status_logger.error("Connection error: check if mail server and port are correct")
             raise
 
+    def post_last(self, end_timestamp):
+
+        payload = {
+            "datasourceId": self.datasource_id,
+            "parsingDate": int(end_timestamp),
+            "contentId": None,
+            "rawContent": None,
+            "datasourcePayload": {},
+            "resources": {
+                "binaries": []
+            },
+            "acl": {
+                "type": ["deleted"]
+            },
+            "scheduleId": self.schedule_id,
+            "tenantId": self.tenant_id,
+            "last": True
+        }
+
+        post_message(ingestion_url, payload)
+
     def extract(self):
 
         try:
@@ -158,6 +179,8 @@ class AsyncEmailExtraction(threading.Thread):
         # when done, you should log out
         self.imap.close()
         self.imap.logout()
+
+        self.post_last(end_timestamp)
 
         self.status_logger.info("Extraction completed")
         self.status_logger.info(str(email_posted) + " emails have been posted")
