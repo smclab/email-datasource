@@ -45,7 +45,7 @@ def parse_email(fetched_msg):
     msg_from = msg['From']
     msg_to = msg['To']
     msg_cc = msg['Cc']
-    msg_id = msg.get('Message-ID')
+    msg_id = str(msg.get('Message-ID')).strip()
 
     msg_date = email.utils.parsedate_tz(msg['Date'])
     local_date = email.utils.mktime_tz(msg_date)
@@ -57,7 +57,6 @@ def parse_email(fetched_msg):
         if msg.is_multipart():
             for j, part in enumerate(msg.walk()):
                 content_type = part.get_content_type()
-                logger.info(content_type)
                 if content_type == 'text/html' or content_type == "text/plain":
                     charset = part.get_content_charset()
                     # decode the base64 unicode bytestring into plain text
